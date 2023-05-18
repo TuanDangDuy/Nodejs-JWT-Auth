@@ -1,0 +1,18 @@
+với đoạn mã trên tôi đã test thử trên post nó lại báo email đã tồn tại, nhưng khi check đã thì nó lại được tạo mới
+ChatGPT
+Vấn đề có thể liên quan đến cách bạn kiểm tra sự tồn tại của người dùng trong cơ sở dữ liệu. Trong đoạn mã của bạn, bạn sử dụng User.find({ email: email }) để tìm kiếm người dùng với địa chỉ email đã được cung cấp.
+
+Tuy nhiên, hàm User.find() trả về một mảng các người dùng thỏa mãn điều kiện tìm kiếm. Ngay cả khi không có người dùng nào được tìm thấy, mảng kết quả trả về vẫn sẽ là một mảng rỗng, không phải là null hoặc undefined. Do đó, trong điều kiện kiểm tra if(existingUser), ngay cả khi không có người dùng nào được tìm thấy, điều kiện vẫn trả về true, và mã lỗi "User already exists" được gửi lại cho client.
+
+Để khắc phục vấn đề này, bạn có thể sử dụng User.findOne({ email: email }) thay vì User.find({ email: email }). Hàm findOne() sẽ trả về một đối tượng người dùng đầu tiên tìm thấy hoặc null nếu không có người dùng nào thỏa mãn điều kiện tìm kiếm.
+
+Dưới đây là một phiên bản sửa đổi của đoạn mã để sử dụng findOne():
+
+javascript
+Copy code
+const existingUser = await User.findOne({ email: email });
+
+if (existingUser) {
+  return res.status(400).json({ message: 'User already exists' });
+}
+Bằng cách này, nếu không có người dùng nào được tìm thấy, biến existingUser sẽ có giá trị null, và điều kiện if(existingUser) sẽ trả về false, không gửi lại lỗi "User already exists".
